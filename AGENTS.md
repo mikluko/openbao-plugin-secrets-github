@@ -88,9 +88,9 @@ gh issue list --repo rknightion/openbao-plugin-secrets-github --state all --limi
 
 ## Task tracking
 
-`backlog/` is the source of truth for open work; new work is `obg-NNNN`. Read the **Agent fan-out
-protocol (canonical)** doc before designing a wave, and the **Wave operating model** doc for this
-project's own rules.
+`backlog/` is the source of truth for open work; new work is `obg-NNNN`.
+
+Loops: the protocol lives in `~/repos/agent-docs/sources/loop/` (this board's "Loop protocol pointer" doc points there); this repository's loop facts are in `LOOP.md`.
 
 - **`backlog/` is committed to a PUBLIC repo, so no real identifiers in tasks or docs.** No email
   addresses, handles, App IDs, installation IDs, private-key or token material, tailnet addresses,
