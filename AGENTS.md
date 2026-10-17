@@ -56,6 +56,10 @@ non-interactive session.
 different stdlib than releases ship. A newly published stdlib CVE can therefore fail `just audit`
 with no source change.
 
+Off the Mac, when the remote gate runner is installed (`which gaterun`): `gaterun -- bash -c 'just setup
+>/dev/null && just ci'` (or `just check`), paced across lanes with `gaterun-slot <lane> -- gaterun -- ...`;
+`.gaterunner.yaml` is its contract. Run one test or package locally.
+
 ## Two seams into camden
 
 **Path names are load-bearing in an ACL policy outside this repo.** The bare `token` path
