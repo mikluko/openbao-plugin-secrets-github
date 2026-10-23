@@ -82,7 +82,10 @@ jobs:
           # tailnet name never appears in this public repo.
           suffix=$(sudo tailscale status --json | jq -r '.MagicDNSSuffix')
           [ -n "$suffix" ] && [ "$suffix" != null ] || { echo "::error::no MagicDNS suffix -- tailnet join failed?"; exit 1; }
-          body=$(curl -sS --max-time 15 "https://openbao.${suffix}/v1/sys/health")
+          # The broker action joins with --accept-dns=false, so MagicDNS names
+          # do not resolve; BAO_RESOLVE is its exported `--resolve` pin.
+          # shellcheck disable=SC2086 # BAO_RESOLVE is two curl words
+          body=$(curl -sS --max-time 15 $BAO_RESOLVE "https://openbao.${suffix}/v1/sys/health")
           echo "$body"
           echo "$body" | grep -q '"initialized":true' || { echo "::error::not initialized"; exit 1; }
           echo "$body" | grep -q '"sealed":false'     || { echo "::error::OpenBao is SEALED -- no token can be minted until it unseals"; exit 1; }
