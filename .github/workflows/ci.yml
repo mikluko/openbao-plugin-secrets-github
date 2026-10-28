@@ -58,8 +58,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check results
+        env:
+          NEEDS: ${{ toJSON(needs) }}
         run: |
-          if echo '${{ toJSON(needs) }}' | grep -q '"result": *"failure"\|"result": *"cancelled"'; then
+          if printf '%s' "$NEEDS" | grep -q '"result": *"failure"\|"result": *"cancelled"'; then
             echo "::error::a required job failed"
             exit 1
           fi
