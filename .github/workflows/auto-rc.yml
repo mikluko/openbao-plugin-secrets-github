@@ -15,8 +15,13 @@ name: auto-rc
 #
 # `workflows:` matches the workflow's `name:` field, NOT its filename. If that
 # name changes this silently stops firing and RCs stop being cut, with no error.
+#
+# zizmor flags every workflow_run trigger. This one is safe because the `rc` job
+# below only runs for a successful CI run that was a push to this repository,
+# never a pull request, so the only code it tags and builds is code already
+# pushed to main.
 on:
-  workflow_run:
+  workflow_run: # zizmor: ignore[dangerous-triggers] gated on push events from this repo, see the rc job
     workflows: [CI]
     types: [completed]
     branches: [main]
@@ -33,7 +38,15 @@ jobs:
   rc:
     # workflow_run fires for FAILED and cancelled runs too, so the conclusion
     # check is what actually gates the RC on green CI.
-    if: github.event.workflow_run.conclusion == 'success'
+    #
+    # `branches: [main]` above matches the triggering run's head branch NAME,
+    # so a fork pull request from a branch called `main` also matches it, and
+    # CI runs on pull requests. Without the event and repository checks a green
+    # fork PR would be tagged and published as an RC with write access.
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     permissions:
       contents: write      # create the RC tag and the GitHub prerelease
       pull-requests: read  # find the open release-please PR
@@ -56,6 +69,10 @@ jobs:
     permissions:
       contents: write # attach binaries + checksums to the RC release
       packages: write # push the image to GHCR
-    uses: ./.github/workflows/publish.yml
+    # `./` here, not the newer `$/` self-repository form zizmor prefers:
+    # actionlint (pinned in the shared reusable) does not parse `$/` yet. For a
+    # job-level reusable workflow call `./` already resolves at the caller's own
+    # commit, so nothing is lost. Switch once actionlint accepts `$/`.
+    uses: ./.github/workflows/publish.yml # zizmor: ignore[self-repository]
     with:
       release_tag: ${{ needs.rc.outputs.tag }}
